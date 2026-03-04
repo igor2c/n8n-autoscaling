@@ -5,75 +5,91 @@
 FROM alpine:3.23 AS builder
 
 RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    ffmpeg \
     git \
-    openssh-client \
-    graphicsmagick \
-    imagemagick
+    openssh-client
+
+# --- OPTIONAL Group A: browser automation (chromium + puppeteer/playwright) ---
+# Uncomment all Group A blocks throughout this file (Stage 1 + Stage 2).
+# Also switch to n8n-task-runners.full.json in the COPY instruction below.
+# RUN apk add --no-cache \
+#     chromium \
+#     nss \
+#     freetype \
+#     harfbuzz \
+#     ca-certificates \
+#     ttf-freefont
+# ---
+
+# --- OPTIONAL Group B: ffmpeg (media processing) ---
+# Also uncomment Group B COPYs below.
+# RUN apk add --no-cache ffmpeg
+# ---
+
+# --- OPTIONAL Group C: graphicsmagick + imagemagick (image manipulation) ---
+# Also uncomment Group C COPYs below.
+# RUN apk add --no-cache graphicsmagick imagemagick
+# ---
 
 # Stage 2: Copy to runners image
 FROM n8nio/runners:latest
 
 USER root
 
-# Copy all libraries from builder (chromium has many dependencies)
-COPY --from=builder /usr/lib/ /usr/lib/
-COPY --from=builder /usr/share/fonts/ /usr/share/fonts/
-
-# Copy binaries from builder
-COPY --from=builder /usr/bin/chromium-browser /usr/bin/chromium-browser
-COPY --from=builder /usr/bin/ffmpeg /usr/bin/ffmpeg
-COPY --from=builder /usr/bin/ffprobe /usr/bin/ffprobe
+# Copy git from builder
 COPY --from=builder /usr/bin/git /usr/bin/git
-COPY --from=builder /usr/bin/gm /usr/bin/gm
-# ImageMagick binaries
-COPY --from=builder /usr/bin/magick /usr/bin/magick
-COPY --from=builder /usr/bin/convert /usr/bin/convert
-COPY --from=builder /usr/bin/identify /usr/bin/identify
-COPY --from=builder /usr/bin/mogrify /usr/bin/mogrify
-COPY --from=builder /usr/bin/composite /usr/bin/composite
 
-# Create symlink for chromium-browser wrapper script
-RUN ln -sf /usr/lib/chromium/chromium /usr/bin/chromium
+# --- OPTIONAL Group A continued: chromium COPYs ---
+# COPY --from=builder /usr/lib/ /usr/lib/
+# COPY --from=builder /usr/share/fonts/ /usr/share/fonts/
+# COPY --from=builder /usr/bin/chromium-browser /usr/bin/chromium-browser
+# RUN ln -sf /usr/lib/chromium/chromium /usr/bin/chromium
+# ---
 
-# Install npm packages in the task runner's node_modules directory
-WORKDIR /opt/runners/task-runner-javascript
-RUN /usr/local/bin/node /usr/local/lib/node_modules/corepack/dist/corepack.js pnpm add \
-    ajv \
-    ajv-formats \
-    puppeteer-core@22.15.0 \
-    puppeteer-extra \
-    puppeteer-extra-plugin-stealth \
-    playwright-core \
-    playwright-extra
+# --- OPTIONAL Group B: ffmpeg COPYs ---
+# COPY --from=builder /usr/bin/ffmpeg /usr/bin/ffmpeg
+# COPY --from=builder /usr/bin/ffprobe /usr/bin/ffprobe
+# ---
 
-# Install Python packages in the task runner's venv
-RUN /usr/local/bin/uv pip install --python /opt/runners/task-runner-python/.venv/bin/python --no-cache \
-    requests \
-    pillow \
-    pandas \
-    numpy
+# --- OPTIONAL Group C: graphicsmagick + imagemagick COPYs ---
+# COPY --from=builder /usr/bin/gm /usr/bin/gm
+# COPY --from=builder /usr/bin/magick /usr/bin/magick
+# COPY --from=builder /usr/bin/convert /usr/bin/convert
+# COPY --from=builder /usr/bin/identify /usr/bin/identify
+# COPY --from=builder /usr/bin/mogrify /usr/bin/mogrify
+# COPY --from=builder /usr/bin/composite /usr/bin/composite
+# ---
 
-# Copy custom task runner config that:
-# - Removes --disable-proto=delete flag (allows puppeteer/playwright to work)
-# - Allowlists puppeteer-core, playwright-core and other packages
-# - Sets PUPPETEER_EXECUTABLE_PATH and PLAYWRIGHT env vars in env-overrides
-COPY n8n-task-runners.json /etc/n8n-task-runners.json
+# --- OPTIONAL Group A continued: npm packages (ajv, puppeteer, playwright) ---
+# WORKDIR /opt/runners/task-runner-javascript
+# RUN /usr/local/bin/node /usr/local/lib/node_modules/corepack/dist/corepack.js pnpm add \
+#     ajv \
+#     ajv-formats \
+#     puppeteer-core@22.15.0 \
+#     puppeteer-extra \
+#     puppeteer-extra-plugin-stealth \
+#     playwright-core \
+#     playwright-extra
+# ---
+
+# --- OPTIONAL Group E: Python packages ---
+# RUN /usr/local/bin/uv pip install --python /opt/runners/task-runner-python/.venv/bin/python --no-cache \
+#     requests \
+#     pillow \
+#     pandas \
+#     numpy
+# ---
+
+# Copy task runner config
+# --- OPTIONAL Use n8n-task-runners.full.json instead if Group A is enabled ---
+COPY n8n-task-runners.minimal.json /etc/n8n-task-runners.json
 RUN chmod 644 /etc/n8n-task-runners.json
 
-# Set Puppeteer to use system Chromium
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
-# Set Playwright to use system Chromium (skip browser download)
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# --- OPTIONAL Group A continued: Puppeteer/Playwright env vars ---
+# ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+# ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# ---
 
 USER runner
 WORKDIR /home/runner

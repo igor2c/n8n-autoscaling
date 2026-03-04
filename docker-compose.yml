@@ -98,8 +98,10 @@ x-task-runner: &service-task-runner
     - N8N_RUNNERS_MAX_CONCURRENCY=${N8N_RUNNERS_MAX_CONCURRENCY}
     - N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT=${N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT}
     - NODE_FUNCTION_ALLOW_EXTERNAL=${NODE_FUNCTION_ALLOW_EXTERNAL:-}
-    - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-    - PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    # --- OPTIONAL: chromium/browser automation env vars --- uncomment to enable ---
+    # - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    # - PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    # ---
     - N8N_RUNNERS_ALLOW_PROTOTYPE_MUTATION=true
     - N8N_RUNNERS_INSECURE_MODE=true
 
@@ -241,8 +243,10 @@ services:
       - N8N_RUNNERS_MAX_CONCURRENCY=${N8N_RUNNERS_MAX_CONCURRENCY}
       - N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT=${N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT}
       - NODE_FUNCTION_ALLOW_EXTERNAL=${NODE_FUNCTION_ALLOW_EXTERNAL:-}
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-      - PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      # --- OPTIONAL: chromium/browser automation env vars --- uncomment to enable ---
+      # - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      # - PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      # ---
       - N8N_RUNNERS_ALLOW_PROTOTYPE_MUTATION=true
       - N8N_RUNNERS_INSECURE_MODE=true
     depends_on:
@@ -348,9 +352,6 @@ services:
       - POLLING_INTERVAL_SECONDS=${POLLING_INTERVAL_SECONDS} # Check every 30 seconds
       - COOLDOWN_PERIOD_SECONDS=${COOLDOWN_PERIOD_SECONDS} # Wait 3 minutes after a scaling action
       - LOG_LEVEL=${LOG_LEVEL:-INFO} # DEBUG for diagnostics, INFO for production
-      - NODE_FUNCTION_ALLOW_EXTERNAL=ajv,ajv-formats,puppeteer-core,playwright-core
-      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-      - PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
       - N8N_QUEUE_BULL_GRACEFULSHUTDOWNTIMEOUT=${N8N_QUEUE_BULL_GRACEFULSHUTDOWNTIMEOUT}
       - N8N_GRACEFUL_SHUTDOWN_TIMEOUT=${N8N_GRACEFUL_SHUTDOWN_TIMEOUT}
     volumes:
