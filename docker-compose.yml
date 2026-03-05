@@ -10,6 +10,9 @@ networks:
     driver: bridge
   shark:
     external: true
+  # OPTIONAL: Chatwoot
+  chatwoot_default:
+    external: true
 
 x-logging: &default-logging
   driver: ${LOG_DRIVER:-json-file}
@@ -112,6 +115,8 @@ services:
     logging: *default-logging
     networks:
       - n8n-network
+      # OPTIONAL: Chatwoot
+      - chatwoot_default
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
