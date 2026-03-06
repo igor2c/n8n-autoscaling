@@ -31,7 +31,7 @@ RUN apk add --no-cache \
 # ---
 
 # Stage 2: Copy to runners image
-FROM FROM n8nio/runners:2.10.3
+FROM n8nio/runners:2.10.3
 
 USER root
 
