@@ -34,6 +34,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Final stage
 FROM python:3.12-slim
 WORKDIR /app
+RUN touch /app/.env
 
 # Install Docker CLI and dependencies in the final stage
 RUN apt-get update && \
