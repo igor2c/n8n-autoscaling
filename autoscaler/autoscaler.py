@@ -1,4 +1,5 @@
 import os
+import shlex
 import time
 import redis
 import docker
@@ -6,6 +7,16 @@ import subprocess
 import logging
 from dotenv import load_dotenv
 
+
+def _write_env_file(path: str = "/app/.env") -> None:
+    """Write current environment to /app/.env for docker compose subprocess var substitution."""
+    with open(path, "w") as f:
+        for key, value in sorted(os.environ.items()):
+            if "\n" not in key and "\n" not in value:
+                f.write(f"{key}={shlex.quote(value)}\n")
+
+
+_write_env_file()
 load_dotenv()
 
 # --- Logging Setup ---
