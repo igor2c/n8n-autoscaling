@@ -222,10 +222,6 @@ def main():
     while True:
         try:
             current_time = time.time()
-            if (current_time - last_scale_time) < COOLDOWN_PERIOD_SECONDS:
-                logging.debug(f"In cooldown period. Next check in {COOLDOWN_PERIOD_SECONDS - (current_time - last_scale_time):.0f}s.")
-                time.sleep(POLLING_INTERVAL_SECONDS) # Still sleep for polling interval
-                continue
 
             queue_len = get_queue_length(r_conn)
             current_reps = get_current_replicas(docker_cl, N8N_WORKER_SERVICE_NAME, COMPOSE_PROJECT_NAME)
@@ -240,7 +236,15 @@ def main():
             last_known_replicas = current_reps
 
             scaled = False
-            if queue_len > SCALE_UP_QUEUE_THRESHOLD and current_reps < MAX_REPLICAS:
+            # Enforce minimum replicas — always, bypassing cooldown
+            if current_reps < MIN_REPLICAS:
+                logging.info(f"Workers below MIN_REPLICAS ({MIN_REPLICAS}), current: {current_reps}. Enforcing minimum.")
+                if scale_worker_with_runner(MIN_REPLICAS, COMPOSE_FILE_PATH, COMPOSE_PROJECT_NAME):
+                    last_scale_time = current_time
+                    scaled = True
+            elif (current_time - last_scale_time) < COOLDOWN_PERIOD_SECONDS:
+                logging.debug(f"In cooldown period. Next check in {COOLDOWN_PERIOD_SECONDS - (current_time - last_scale_time):.0f}s.")
+            elif queue_len > SCALE_UP_QUEUE_THRESHOLD and current_reps < MAX_REPLICAS:
                 new_replicas = min(current_reps + 1, MAX_REPLICAS) # Scale one by one for now
                 logging.info(f"Condition met for SCALE UP. Queue: {queue_len} > {SCALE_UP_QUEUE_THRESHOLD}. Replicas: {current_reps} < {MAX_REPLICAS}.")
                 if scale_worker_with_runner(new_replicas, COMPOSE_FILE_PATH, COMPOSE_PROJECT_NAME):
