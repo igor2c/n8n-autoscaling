@@ -44,6 +44,7 @@ x-n8n: &service-n8n
     - N8N_DATA_TABLES_MAX_SIZE_BYTES=${N8N_DATA_TABLES_MAX_SIZE_BYTES}
     # igor2c
     - NODE_ENV=${NODE_ENV:-production}
+    - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Sao_Paulo}
     - TZ=${TZ:-America/Sao_Paulo}
     - N8N_VERSION_NOTIFICATIONS_ENABLED=${N8N_VERSION_NOTIFICATIONS_ENABLED:-true}  # Opt out of checking for new versions of n8n
     - N8N_REINSTALL_MISSING_PACKAGES=${N8N_REINSTALL_MISSING_PACKAGES:-true}
@@ -93,6 +94,8 @@ x-task-runner: &service-task-runner
     - n8n-network
     - shark
   environment:
+    - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Sao_Paulo}
+    - TZ=${TZ:-America/Sao_Paulo}
     - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
     - N8N_RUNNERS_MAX_CONCURRENCY=${N8N_RUNNERS_MAX_CONCURRENCY}
     - N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT=${N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT}
@@ -238,6 +241,8 @@ services:
   n8n-worker-runner:
     <<: *service-task-runner
     environment:
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Sao_Paulo}
+      - TZ=${TZ:-America/Sao_Paulo}
       - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
       - N8N_RUNNERS_TASK_BROKER_URI=http://n8n-worker:5679
       - N8N_RUNNERS_MAX_CONCURRENCY=${N8N_RUNNERS_MAX_CONCURRENCY}
@@ -368,6 +373,7 @@ services:
       - N8N_EDITOR_BASE_URL=${N8N_EDITOR_BASE_URL}
       - N8N_DATA_TABLES_MAX_SIZE_BYTES=${N8N_DATA_TABLES_MAX_SIZE_BYTES}
       - NODE_ENV=${NODE_ENV:-production}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Sao_Paulo}
       - TZ=${TZ:-America/Sao_Paulo}
       - N8N_VERSION_NOTIFICATIONS_ENABLED=${N8N_VERSION_NOTIFICATIONS_ENABLED:-true}
       - N8N_REINSTALL_MISSING_PACKAGES=${N8N_REINSTALL_MISSING_PACKAGES:-true}
