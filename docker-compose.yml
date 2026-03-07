@@ -189,9 +189,6 @@ services:
       retries: 10
       start_period: 60s
 
-  # No task runner needed for main instance - all executions are offloaded to workers
-  # (OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true)
-
   n8n-webhook:
     <<: *service-n8n
     command: webhook
