@@ -19,8 +19,7 @@ RUN apk add --no-cache \
 # ---
 
 # Stage 2: Copy to n8n image
-ARG N8N_VERSION=2.10.3
-FROM n8nio/n8n:${N8N_VERSION}
+FROM n8nio/n8n:2.10.3
 
 USER root
 
